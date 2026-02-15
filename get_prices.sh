@@ -43,7 +43,13 @@ if [ ! -f "$csv_file" ]; then
     echo "Fecha,USD,EUR" > "$csv_file"
 fi
 
-# Agregar nueva fila
+# Verificar si la fecha ya existe en el CSV
+if grep -q "^$fecha," "$csv_file"; then
+    echo "⚠ La fecha $fecha ya existe en el CSV. No se agregará duplicado."
+    exit 0
+fi
+
+# Agregar nueva fila solo si la fecha no existe
 echo "$fecha,$usd,$eur" >> "$csv_file"
 
 echo "✓ CSV actualizado: Fecha=$fecha, USD=$usd, EUR=$eur"

@@ -33,5 +33,11 @@ jobs:
           git pull --rebase origin main
           git stash list | grep "stash@{0}" && git stash apply
           git add prices.csv
-          git diff --cached --exit-code || git commit -m "Precios actualizados" --allow-empty
-          git push --force-with-lease origin HEAD:main
+          # Solo hacer commit si hay cambios
+          if ! git diff --cached --exit-code > /dev/null 2>&1; then
+            git commit -m "Precios actualizados"
+            git push --force-with-lease origin HEAD:main
+            echo "✓ Cambios guardados"
+          else
+            echo "✓ No hay cambios nuevos (fecha ya registrada)"
+          fi
