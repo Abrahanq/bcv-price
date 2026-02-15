@@ -31,9 +31,9 @@ fecha=$(echo "$fecha" | xargs)
 usd=$(echo "$usd" | xargs)
 eur=$(echo "$eur" | xargs)
 
-# Dejar solo 2 decimales (formato: XXX,XX)
-usd=$(echo "$usd" | sed -E 's/,([0-9]{2}).*/,\1/')
-eur=$(echo "$eur" | sed -E 's/,([0-9]{2}).*/,\1/')
+# Dejar solo 2 decimales (formato: XXX.XX) - convertir coma a punto
+usd=$(echo "$usd" | sed -E 's/,([0-9]{2}).*/.\1/' | tr ',' '.')
+eur=$(echo "$eur" | sed -E 's/,([0-9]{2}).*/.\1/' | tr ',' '.')
 
 # Crear o actualizar CSV
 csv_file="prices.csv"
