@@ -30,6 +30,9 @@ def csv_to_json(csv_file="prices.csv", json_file="prices.json"):
                     "usd": float(row['USD']),
                     "eur": float(row['EUR'])
                 })
+
+        # Solo conservar las ultimas dos cotizaciones del CSV.
+        precios = precios[-2:]
         
         # Escribir JSON
         output = {"precios": precios}
