@@ -46,6 +46,8 @@ fi
 # Verificar si la fecha ya existe en el CSV
 if grep -q "^$fecha," "$csv_file"; then
     echo "⚠ La fecha $fecha ya existe en el CSV. No se agregará duplicado."
+    # Aún así generar JSON
+    python3 csv_to_json.py
     exit 0
 fi
 
@@ -53,3 +55,6 @@ fi
 echo "$fecha,$usd,$eur" >> "$csv_file"
 
 echo "✓ CSV actualizado: Fecha=$fecha, USD=$usd, EUR=$eur"
+
+# Generar JSON desde el CSV
+python3 csv_to_json.py
