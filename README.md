@@ -1,92 +1,88 @@
-# 🇻🇪 BCV Price Feed
+# API precio BCV (USD y EUR) en JSON | Mini API de tasa oficial Venezuela
 
-Pequeño proyecto que funciona como una **API ligera** para consultar el precio oficial del **dólar (USD)** y **euro (EUR)** del Banco Central de Venezuela (BCV).
+Mini API para consultar el precio del dólar BCV y euro BCV en formato JSON, actualizada desde la fuente oficial del Banco Central de Venezuela (BCV).
 
-Obtiene los datos desde la web del BCV, los guarda en CSV y genera un JSON listo para consumir desde cualquier app, bot o dashboard.
+Este repositorio está pensado para quienes buscan una API del precio del BCV para usar en apps, bots, dashboards o automatizaciones.
 
----
+## ¿Qué es este proyecto?
 
-## ✨ ¿Qué hace este repo?
+`bcv-price` es una mini API sin backend tradicional:
 
-- Consulta la tasa oficial del BCV para **USD** y **EUR**.
-- Extrae también la **fecha valor**.
-- Guarda histórico en `prices.csv`.
-- Genera `prices.json` en formato tipo API.
-- Evita duplicar registros cuando la fecha ya existe.
+- Extrae la tasa oficial BCV de USD y EUR.
+- Guarda histórico en CSV.
+- Publica JSON listo para consumo como API.
+- Mantiene registros por fecha (sin duplicados).
 
----
+Si estás buscando: **api precio bcv**, **precio dólar bcv hoy**, **tasa oficial bcv json**, este repo está hecho para ese caso.
 
-## 📦 Estructura
+## Características principales
 
-- `get_prices.sh`: descarga y procesa datos desde https://bcv.org.ve
-- `csv_to_json.py`: convierte el CSV a JSON
-- `prices.csv`: histórico de tasas
-- `prices.json`: salida para consumo externo
+- Precio BCV USD y EUR con fecha valor.
+- Salida JSON simple y estable para integraciones.
+- Estructura ligera y fácil de desplegar.
+- Automatizable con GitHub Actions (ejecución programada).
 
----
+## Estructura del repositorio
 
-## 🚀 Uso rápido
+- `get_prices.sh`: obtiene y procesa datos desde https://bcv.org.ve
+- `csv_to_json.py`: transforma el histórico CSV a JSON
+- `prices.csv`: histórico de tasas BCV
+- `prices.json`: respuesta tipo API para consumo externo
+
+## Uso rápido
 
 ```bash
 chmod +x get_prices.sh
 ./get_prices.sh
+python3 csv_to_json.py
 ```
 
-Al ejecutar, el script:
-1. Consulta BCV.
-2. Actualiza `prices.csv`.
-3. Regenera `prices.json`.
+Resultado:
 
----
+1. Se consulta la tasa oficial del BCV.
+2. Se actualiza `prices.csv`.
+3. Se genera `prices.json` para consumo como mini API.
 
-## 🔌 Formato “API” (`prices.json`)
+## Formato de respuesta (mini API JSON)
 
 ```json
 {
-	"precios": [
-		{
-			"fecha": "2026-02-19",
-			"usd": 74.12,
-			"eur": 80.95
-		},
-		{
-			"fecha": "2026-02-20",
-			"usd": 74.30,
-			"eur": 81.10
-		}
-	]
+  "precios": [
+    {
+      "fecha": "2026-02-19",
+      "usd": 74.12,
+      "eur": 80.95
+    },
+    {
+      "fecha": "2026-02-20",
+      "usd": 74.30,
+      "eur": 81.10
+    }
+  ]
 }
 ```
 
-> Nota: actualmente se publican las **2 últimas cotizaciones** registradas en el CSV.
+Nota: actualmente el JSON publica las 2 últimas cotizaciones registradas.
 
----
-
-## 💡 Ejemplo de consumo
+## Ejemplos de consumo
 
 ```bash
 cat prices.json
 ```
 
-Con `jq` (si lo tienes instalado):
-
 ```bash
 jq '.precios[-1]' prices.json
 ```
 
----
+## Casos de uso
 
-## ⚠️ Consideraciones
+- API para precio dólar BCV en bots de Telegram o WhatsApp.
+- Tasa BCV para paneles internos y dashboards financieros.
+- Automatizaciones con cron y tareas de actualización diaria.
+- Integraciones simples donde se necesite tipo de cambio BCV en JSON.
 
-- Este proyecto depende de la estructura HTML del sitio del BCV.
-- Si BCV cambia su markup, puede requerir ajustes en el scraping.
-- Las tasas mostradas son informativas según la fuente oficial consultada.
+## Consideraciones
 
----
-
-## 🤝 Ideal para
-
-- Bots de Telegram/WhatsApp
-- Widgets de tipo de cambio
-- Dashboards financieros internos
-- Automatizaciones con cron
+- La extracción depende de la estructura HTML de BCV.
+- Si BCV cambia su sitio, el script puede requerir ajustes.
+- Los datos son informativos y se basan en la fuente oficial consultada.
