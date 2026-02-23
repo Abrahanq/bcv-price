@@ -2,7 +2,7 @@ name: Precio diario
 
 on:
   schedule:
-    - cron: '30 22 * * *' # Runs every day at 22:30 UTC que son las 6pm hora venezuela, ya el banco debe haber publicado los precios
+    - cron: '30 21 * * *' # Runs every day at 21:30 UTC que son las 5pm hora venezuela, ya el banco debe haber publicado los precios
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
