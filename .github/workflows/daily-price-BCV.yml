@@ -37,31 +37,23 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
-          # Agregar cambios
+
+          STASH_NAME="workflow-local-$(date +%s)"
+          git stash push --include-untracked -m "$STASH_NAME"
+
+          git pull --rebase origin main
+
+          if git stash list | grep -q "$STASH_NAME"; then
+            git stash pop --index
+          fi
+
           git add prices.csv prices.json
-          
-          # Verificar si hay cambios a committear
+
           if git diff --cached --quiet; then
             echo "✓ No hay cambios nuevos (fecha ya registrada)"
             exit 0
           fi
-          
-          # Hacer pull --rebase antes de push
-          git pull --rebase origin main || {
-            echo "Error en pull --rebase, intentando merge..."
-            git merge --abort 2>/dev/null || true
-            exit 1
-          }
-          
-          # Agregar nuevamente después del rebase para asegurar cambios
-          git add prices.csv prices.json
-          
-          # Hacer commit y push si aún hay cambios
-          if ! git diff --cached --quiet; then
-            git commit -m "Precios actualizados"
-            git push origin main
-            echo "✓ Cambios guardados"
-          else
-            echo "✓ No hay cambios después del rebase"
-          fi
+
+          git commit -m "Precios actualizados"
+          git push origin HEAD:main
+          echo "✓ Cambios guardados"
