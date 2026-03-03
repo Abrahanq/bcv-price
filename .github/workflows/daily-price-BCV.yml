@@ -2,7 +2,8 @@ name: Precio diario
 
 on:
   schedule:
-    - cron: '30 21 * * *' # Runs every day at 21:30 UTC que son las 5pm hora venezuela, ya el banco debe haber publicado los precios
+    - cron: '30 21 * * *' # Primer intento: 21:30 UTC (5:00pm Venezuela)
+    - cron: '0 22 * * 1-5' # Reintento: 22:00 UTC (5:30pm Venezuela) entre semana
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -12,6 +13,18 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Identificar si es reintento
+        id: schedule-check
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" = "22" ]; then
+            echo "is_retry=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Este es un reintento (30min después)"
+          else
+            echo "is_retry=false" >> $GITHUB_OUTPUT
+            echo "✓ Primer intento"
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -37,23 +50,27 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-
-          STASH_NAME="workflow-local-$(date +%s)"
-          git stash push --include-untracked -m "$STASH_NAME"
-
-          git pull --rebase origin main
-
-          if git stash list | grep -q "$STASH_NAME"; then
-            git stash pop --index
-          fi
-
+          
           git add prices.csv prices.json
-
+          
           if git diff --cached --quiet; then
-            echo "✓ No hay cambios nuevos (fecha ya registrada)"
+            if [ "${{ steps.schedule-check.outputs.is_retry }}" = "true" ]; then
+              echo "✓ Precio ya fue actualizado en el primer intento"
+            else
+              echo "✓ No hay cambios nuevos (fecha ya registrada)"
+            fi
             exit 0
           fi
-
-          git commit -m "Precios actualizados"
-          git push origin HEAD:main
-          echo "✓ Cambios guardados"
+          
+          git pull --rebase origin main || {
+            echo "Error en pull --rebase"
+            exit 1
+          }
+          
+          git add prices.csv prices.json
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "Precios actualizados"
+            git push origin main
+            echo "✓ Cambios guardados"
+          fi
