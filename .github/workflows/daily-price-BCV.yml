@@ -53,6 +53,7 @@ jobs:
           
           git add prices.csv prices.json
           
+          # Si NO hay cambios, salir
           if git diff --cached --quiet; then
             if [ "${{ steps.schedule-check.outputs.is_retry }}" = "true" ]; then
               echo "✓ Precio ya fue actualizado en el primer intento"
@@ -62,15 +63,15 @@ jobs:
             exit 0
           fi
           
+          # Hacer commit ANTES de pull --rebase
+          git commit -m "Precios actualizados"
+          
+          # Ahora sí hacer pull --rebase (sin cambios uncommitted)
           git pull --rebase origin main || {
             echo "Error en pull --rebase"
             exit 1
           }
           
-          git add prices.csv prices.json
-          
-          if ! git diff --cached --quiet; then
-            git commit -m "Precios actualizados"
-            git push origin main
-            echo "✓ Cambios guardados"
-          fi
+          # Push de los commits
+          git push origin main
+          echo "✓ Cambios guardados"
