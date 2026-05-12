@@ -12,10 +12,10 @@ fi
 fecha=$(echo "$html" | grep "Fecha Valor" | grep -oP 'content="\K[^"]+' | cut -d'T' -f1)
 
 # Extraer precio USD
-usd=$(echo "$html" | grep 'id="dolar"' -A 10 | sed -n 's/.*<strong>\s*\([^<]*\).*/\1/p' | head -1)
+usd=$(echo "$html" | grep 'id="dolar"' -A 10 | grep -oP '<strong[^>]*>\K[^<]+')
 
 # Extraer precio EUR
-eur=$(echo "$html" | grep 'id="euro"' -A 10 | sed -n 's/.*<strong>\s*\([^<]*\).*/\1/p' | head -1)
+eur=$(echo "$html" | grep 'id="euro"' -A 10 | grep -oP '<strong[^>]*>\K[^<]+')
 
 # Validar que se extrajeron los datos
 if [ -z "$fecha" ] || [ -z "$usd" ] || [ -z "$eur" ]; then
