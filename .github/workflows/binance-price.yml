@@ -1,0 +1,43 @@
+name: Precio Binance P2P
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  actualizar_binance:
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.0
+
+      - name: Obtener precios Binance P2P
+        run: |
+          chmod +x get_binance_price.sh
+          bash get_binance_price.sh
+
+      - name: Commit results
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          git add binance_price.json
+
+          if git diff --cached --quiet; then
+            echo "✓ Sin cambios en el precio de Binance"
+            exit 0
+          fi
+
+          git commit -m "Precio Binance actualizado"
+
+          git pull --rebase origin main || {
+            echo "Error en pull --rebase"
+            exit 1
+          }
+
+          git push origin main
+          echo "✓ Cambios guardados"
