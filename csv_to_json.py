@@ -27,11 +27,22 @@ def csv_to_json(csv_file="prices.csv", json_file="prices.json",
     try:
         with open(csv_file, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            for row in reader:
+            for line_number, row in enumerate(reader, start=2):
+                try:
+                    fecha = row['Fecha']
+                    usd = float(row['USD'])
+                    eur = float(row['EUR'])
+                except (KeyError, TypeError, ValueError) as error:
+                    raise ValueError(
+                        f"fila {line_number} inválida: "
+                        f"Fecha={row.get('Fecha')!r}, USD={row.get('USD')!r}, "
+                        f"EUR={row.get('EUR')!r} ({error})"
+                    ) from error
+
                 precios.append({
-                    "fecha": row['Fecha'],
-                    "usd": float(row['USD']),
-                    "eur": float(row['EUR'])
+                    "fecha": fecha,
+                    "usd": usd,
+                    "eur": eur
                 })
 
         # Ordenar por fecha y eliminar fechas duplicadas (gana la ultima fila)
@@ -60,4 +71,4 @@ def csv_to_json(csv_file="prices.csv", json_file="prices.json",
         return False
 
 if __name__ == "__main__":
-    csv_to_json()
+    raise SystemExit(0 if csv_to_json() else 1)

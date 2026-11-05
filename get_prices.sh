@@ -1,5 +1,25 @@
 #!/bin/bash
 
+set -euo pipefail
+
+normalize_rate() {
+    local value
+    value=$(echo "$1" | xargs)
+
+    # BCV usa coma decimal y puntos como separadores de miles.
+    if [[ "$value" == *,* ]]; then
+        value=${value//./}
+        value=${value//,/.}
+    fi
+
+    if [[ ! "$value" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+        echo "Error: valor de tasa inválido: '$1' (normalizado: '$value')" >&2
+        return 1
+    fi
+
+    printf '%s\n' "$value"
+}
+
 # Descargar la página del BCV una sola vez
 html=$(curl -k -s "https://bcv.org.ve" 2>/dev/null)
 
@@ -28,12 +48,16 @@ fi
 
 # Limpiar espacios en blanco
 fecha=$(echo "$fecha" | xargs)
-usd=$(echo "$usd" | xargs)
-eur=$(echo "$eur" | xargs)
 
-# Dejar solo 2 decimales (formato: XXX.XX) - convertir coma a punto
-usd=$(echo "$usd" | sed -E 's/,([0-9]{2}).*/.\1/' | tr ',' '.')
-eur=$(echo "$eur" | sed -E 's/,([0-9]{2}).*/.\1/' | tr ',' '.')
+# Normalizar tasas y validar antes de escribir el CSV.
+usd=$(normalize_rate "$usd") || {
+    echo "Error: USD extraído del BCV no es válido: '$usd'" >&2
+    exit 1
+}
+eur=$(normalize_rate "$eur") || {
+    echo "Error: EUR extraído del BCV no es válido: '$eur'" >&2
+    exit 1
+}
 
 # Crear o actualizar CSV
 csv_file="prices.csv"
